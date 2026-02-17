@@ -1,0 +1,59 @@
+{
+  "expo": {
+    "name": "ECHO 余甜",
+    "slug": "itinerary-check-in",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/appIcon.png",
+    "scheme": "io.echoyutian",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "package": "com.tymlpqq.itineraryCheckIn"
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/appIcon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/appIcon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ],
+      [
+        "expo-asset",
+        {
+          "assets": ["./assets/images/landing.png"]
+        }
+      ],
+      "expo-localization"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "f5c3cced-1650-4404-bc4c-a966ee768ff0"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/f5c3cced-1650-4404-bc4c-a966ee768ff0"
+    }
+  }
+}

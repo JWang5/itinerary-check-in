@@ -6,7 +6,8 @@ import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect } from 'react';
+import * as Updates from 'expo-updates';
+import React, { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthProvider, useAuth } from '../provider/authProvider';
 import { useUserCheckInStore } from '../store/useUserCheckInStore';
@@ -109,6 +110,31 @@ export default function RootLayout() {
   });
 
   const [assets, assetsError] = useAssets([require('@/assets/images/landing.png')]);
+  const [isUpdateChecking, setIsUpdateChecking] = useState(true);
+
+  useEffect(() => {
+    async function onFetchUpdateAsync() {
+      try {
+        if (__DEV__) {
+          setIsUpdateChecking(false);
+          return;
+        }
+
+        const update = await Updates.checkForUpdateAsync();
+        if (update.isAvailable) {
+          await Updates.fetchUpdateAsync();
+          await Updates.reloadAsync();
+        }
+      } catch (error) {
+        // If there's an error checking for updates, we still want to let the user in
+        console.warn('OTA Update Error:', error);
+      } finally {
+        setIsUpdateChecking(false);
+      }
+    }
+
+    onFetchUpdateAsync();
+  }, []);
 
   useEffect(() => {
     if (error) {
@@ -127,7 +153,11 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <GestureHandlerRootView style={{ flex: 1 }}>
-          <RootLayoutNav loaded={loaded} error={error} assetsLoaded={!!assets} />
+          <RootLayoutNav
+            loaded={loaded && !isUpdateChecking}
+            error={error}
+            assetsLoaded={!!assets}
+          />
           <StatusBar style="dark" />
         </GestureHandlerRootView>
       </AuthProvider>

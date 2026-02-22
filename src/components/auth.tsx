@@ -142,8 +142,8 @@ export default function AuthDialog({ onClose }: AuthProps) {
       return;
     }
 
-    // Password rule: at least 8 characters, must contain uppercase, lowercase, numbers, and symbols
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+    // Password rule: at least 8 characters, must contain uppercase, lowercase, numbers
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
     if (authMode === 'signup' && !passwordRegex.test(password)) {
       showAlert(t('common.error'), t('auth.passwordRule'));
       return;

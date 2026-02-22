@@ -22,7 +22,7 @@
     "fillAllFields": "Please fill in all fields",
     "confirmPassword": "Confirm Password",
     "passwordsDoNotMatch": "Passwords do not match",
-    "passwordRule": "Password must be at least 8 characters long and contain uppercase, lowercase, numbers, and symbols",
+    "passwordRule": "Password must be at least 8 characters long and contain uppercase, lowercase, and numbers",
     "invalidCredentials": "Invalid email or password. Please try again.",
     "userAlreadyExists": "This email is already registered. Please login instead.",
     "invitationCode": "Invitation Code",

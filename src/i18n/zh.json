@@ -22,7 +22,7 @@
     "fillAllFields": "请填写所有字段",
     "confirmPassword": "确认密码",
     "passwordsDoNotMatch": "密码不一致",
-    "passwordRule": "密码必须至少为 8 位，且包含大写字母、小写字母、数字和符号",
+    "passwordRule": "密码必须至少为 8 位，且包含大写字母、小写字母和数字",
     "invalidCredentials": "邮箱或密码错误，请稍后重试。",
     "userAlreadyExists": "该邮箱已注册，请直接登录。",
     "invitationCode": "邀请码",

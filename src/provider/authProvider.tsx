@@ -10,8 +10,6 @@ type AuthProps = {
   signOut: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, options?: any) => Promise<any>;
-  verifyInvitation: (code: string) => Promise<boolean>;
-  consumeInvitation: (code: string) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
 };
 
@@ -72,22 +70,6 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     return data;
   };
 
-  const verifyInvitation = async (code: string) => {
-    const { data, error } = await supabase
-      .from('invitations')
-      .select('id')
-      .eq('code', code.trim())
-      .single();
-
-    if (error) throw error;
-    return !!data;
-  };
-
-  const consumeInvitation = async (code: string) => {
-    const { error } = await supabase.from('invitations').delete().eq('code', code.trim());
-    if (error) throw error;
-  };
-
   const resetPassword = async (email: string) => {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: 'io.echoyutian://auth/reset-password',
@@ -109,8 +91,6 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     signOut,
     signIn,
     signUp,
-    verifyInvitation,
-    consumeInvitation,
     resetPassword,
   };
 

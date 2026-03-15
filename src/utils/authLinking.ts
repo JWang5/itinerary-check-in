@@ -1,4 +1,4 @@
-﻿import { supabase } from '@/src/utils/supabase';
+import { supabase } from '@/src/utils/supabase';
 import * as Linking from 'expo-linking';
 import { router } from 'expo-router';
 

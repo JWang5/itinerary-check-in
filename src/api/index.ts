@@ -8,3 +8,4 @@
 
 export { citiesApi } from './supabase/cities';
 export { storageApi } from './supabase/storage';
+export type { SignedImagePayload } from './supabase/storage';

@@ -1,7 +1,7 @@
 import Alert from '@/src/components/alert';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
-import { ArrowRight, Eye, EyeOff, Key, Lock, Mail, User, X } from 'lucide-react-native';
+import { ArrowRight, Eye, EyeOff, Lock, Mail, User, X } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -35,11 +35,7 @@ export default function AuthDialog({ onClose }: AuthProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { signIn, signUp, verifyInvitation, consumeInvitation, resetPassword } = useAuth();
-
-  // Invitation Code State
-  const [inviteCode, setInviteCode] = useState('');
-  const [isInviteVerified, setIsInviteVerified] = useState(false);
+  const { signIn, signUp, resetPassword } = useAuth();
 
   const [isVerificationSent, setIsVerificationSent] = useState(false);
 
@@ -87,18 +83,6 @@ export default function AuthDialog({ onClose }: AuthProps) {
       setLoading(false);
     }
   }
-
-  const handleVerifyInviteCode = async () => {
-    setLoading(true);
-    try {
-      await verifyInvitation(inviteCode);
-      setIsInviteVerified(true);
-    } catch {
-      showAlert(t('common.error'), t('auth.invalidInvitationCode'));
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleResetPassword = async () => {
     if (!email) {
@@ -165,11 +149,6 @@ export default function AuthDialog({ onClose }: AuthProps) {
       if (!session) {
         setIsVerificationSent(true);
       } else {
-        // Delete the consumed invitation code
-        if (inviteCode) {
-          await consumeInvitation(inviteCode);
-        }
-
         showAlert(t('common.success'), t('auth.signUpSuccess'), [
           {
             text: t('common.confirm'),
@@ -250,42 +229,19 @@ export default function AuthDialog({ onClose }: AuthProps) {
               ? t('auth.welcomeBack')
               : authMode === 'reset'
                 ? t('auth.resetPassword')
-                : !isInviteVerified
-                  ? t('auth.invitationCode')
-                  : t('auth.createAccount')}
+                : t('auth.createAccount')}
           </Text>
           <Text style={styles.loginSubtitle}>
             {authMode === 'login'
               ? t('auth.startJourney')
               : authMode === 'reset'
                 ? t('auth.enterEmailToReset')
-                : !isInviteVerified
-                  ? t('auth.enterInvitationCode')
-                  : t('auth.joinUs')}
+                : t('auth.joinUs')}
           </Text>
         </View>
 
         <View style={styles.form}>
-          {authMode === 'signup' && !isInviteVerified ? (
-            // Invitation Code Step
-            <>
-              <View style={styles.inputContainer}>
-                <Key color="rgba(255,255,255,0.6)" size={20} style={styles.inputIcon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder={t('auth.invitationCode')}
-                  placeholderTextColor="rgba(255,255,255,0.4)"
-                  value={inviteCode}
-                  onChangeText={setInviteCode}
-                  autoCapitalize="characters"
-                />
-              </View>
-              <TouchableOpacity style={styles.actionButton} onPress={handleVerifyInviteCode}>
-                <Text style={styles.actionButtonText}>{t('auth.verify')}</Text>
-                <ArrowRight size={20} color={Colors.text} style={{ marginLeft: 8 }} />
-              </TouchableOpacity>
-            </>
-          ) : authMode === 'reset' ? (
+          {authMode === 'reset' ? (
             // Reset Password Form
             <>
               <View style={styles.inputContainer}>
@@ -420,9 +376,6 @@ export default function AuthDialog({ onClose }: AuthProps) {
               <TouchableOpacity
                 onPress={() => {
                   setAuthMode(authMode === 'login' ? 'signup' : 'login');
-                  if (authMode === 'signup') {
-                    setIsInviteVerified(false);
-                  }
                 }}>
                 <Text style={styles.switchModeLink}>
                   {authMode === 'login' ? t('auth.signup') : t('auth.login')}

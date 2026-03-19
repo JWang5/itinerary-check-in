@@ -31,7 +31,8 @@ export const itineraryApi = {
   async getFullItineraryById(
     id: string,
   ): Promise<
-    (ItineraryDB & { itinerary_items: (ItineraryItemDB & { location: LocationDB })[] }) | null
+    | (ItineraryDB & { itinerary_items: (ItineraryItemDB & { locations: LocationDB | null })[] })
+    | null
   > {
     const { data, error } = await supabase
       .from('itineraries')
@@ -55,7 +56,10 @@ export const itineraryApi = {
   async getItineraryById(id: string): Promise<ItineraryDB | null> {
     const { data, error } = await supabase.from('itineraries').select('*').eq('id', id).single();
 
-    if (error) throw error;
+    if (error) {
+      if (error.code === 'PGRST116') return null; // Not found
+      throw error;
+    }
     return data;
   },
 

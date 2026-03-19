@@ -14,16 +14,18 @@ import { AnimatedFlatList } from '@kanelloc/react-native-animated-header-scroll-
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useFocusEffect, useRouter } from 'expo-router';
 import { Calendar, Plus } from 'lucide-react-native';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface ItineraryCardProps {
   itinerary: Itinerary;
+  startDateStr: string;
+  endDateStr: string;
 }
 
-const ItineraryCard = ({ itinerary }: ItineraryCardProps) => {
+const ItineraryCard = ({ itinerary, startDateStr, endDateStr }: ItineraryCardProps) => {
   const isPassed = itinerary.status === 'past';
   const isOngoing = itinerary.status === 'ongoing';
   const { t } = useTranslation();
@@ -68,9 +70,8 @@ const ItineraryCard = ({ itinerary }: ItineraryCardProps) => {
             <View style={styles.locationRow}>
               <Calendar size={14} color={Colors.inverseText} />
               <Text style={styles.locationDetailText}>
-                {formatToShortDate(itinerary.startDate)}
-                {'—'}
-                {formatToShortDate(itinerary.endDate)}
+                {startDateStr}
+                {endDateStr === startDateStr ? '' : `—${endDateStr}`}
               </Text>
             </View>
           </View>
@@ -99,7 +100,7 @@ export default function ItinerariesScreen() {
   const [activeTab, setActiveTab] = useState<'planned' | 'past'>('planned');
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { session } = useAuth();
   const [headerHeight, setHeaderHeight] = useState(250);
 
@@ -144,6 +145,16 @@ export default function ItinerariesScreen() {
     }
     return plan.status === 'past';
   });
+
+  const localizedItineraries = useMemo(
+    () =>
+      filteredItineraries.map((plan) => ({
+        ...plan,
+        startDateStr: formatToShortDate(plan.startDate),
+        endDateStr: formatToShortDate(plan.endDate),
+      })),
+    [filteredItineraries],
+  );
 
   if (loading && itineraries.length === 0) {
     return (
@@ -190,8 +201,14 @@ export default function ItinerariesScreen() {
       <View style={{ paddingTop: insets.top + Layout.padding.md }}>
         <AnimatedFlatList
           headerMaxHeight={headerHeight}
-          data={filteredItineraries}
-          renderItem={({ item }: { item: Itinerary }) => <ItineraryCard itinerary={item} />}
+          data={localizedItineraries}
+          renderItem={({ item }) => (
+            <ItineraryCard
+              itinerary={item}
+              startDateStr={item.startDateStr}
+              endDateStr={item.endDateStr}
+            />
+          )}
           keyExtractor={(item: Itinerary) => item.id}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}

@@ -1,40 +1,52 @@
 import { Layout } from '@/src/constants/theme/layout';
 import { Colors, Shadows } from '@/src/constants/theme/theme';
 import { Typography } from '@/src/constants/theme/typography';
-import { Location } from '@/src/types/model';
+import { PlannedItem } from '@/src/types/model';
 import { formatTimeStr } from '@/src/utils/date';
 import { ChevronDown, ChevronUp, Clock, MapPin, X } from 'lucide-react-native';
-import React, { useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { CachedImage } from '../CachedImage';
 import { TimePickerModal } from './TimePickerModal';
 import { TimelineItem } from './TimelineItem';
 
 interface EditableRouteItemProps {
-  location: Location;
+  item: PlannedItem;
   time: string;
   isFirst: boolean;
   isLast: boolean;
   onRemove: () => void;
   onTimeChange: (newTime: string) => void;
+  onCustomNameChange?: (value: string) => void;
+  onCustomAddressChange?: (value: string) => void;
+  onCustomFieldFocus?: (input: TextInput | null) => void;
   onMoveUp?: () => void;
   onMoveDown?: () => void;
 }
 
 export const EditableRouteItem = ({
-  location,
+  item,
   time,
   isFirst,
   isLast,
   onRemove,
   onTimeChange,
+  onCustomNameChange,
+  onCustomAddressChange,
+  onCustomFieldFocus,
   onMoveUp,
   onMoveDown,
 }: EditableRouteItemProps) => {
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const customNameInputRef = useRef<TextInput | null>(null);
+  const customAddressInputRef = useRef<TextInput | null>(null);
+  const { t } = useTranslation();
+  const isCustomItem = item.itemType === 'custom';
+  const location = item.location;
 
   return (
-    <TimelineItem isFirst={isFirst} isLast={isLast} isActive={isFirst}>
+    <TimelineItem isFirst={isFirst} isLast={isLast} isActive={false}>
       <View style={styles.routeItemContainer}>
         <TouchableOpacity style={styles.timeInput} onPress={() => setShowTimePicker(true)}>
           <Clock size={14} color={Colors.secondaryText} />
@@ -56,19 +68,48 @@ export const EditableRouteItem = ({
             </TouchableOpacity>
           </View>
 
-          <CachedImage imageKey={location.imagePath} style={styles.routeImage} />
-
-          <View style={styles.routeInfo}>
-            <Text style={styles.routeName} numberOfLines={1}>
-              {location.name}
-            </Text>
-            <View style={styles.routeAddressRow}>
-              <MapPin size={14} color={Colors.text} style={{ marginTop: 4 }} />
-              <Text style={styles.routeSubText} numberOfLines={2}>
-                {location.address}
-              </Text>
+          {isCustomItem ? (
+            <View style={styles.customCard}>
+              <TextInput
+                ref={customNameInputRef}
+                value={item.customName ?? ''}
+                onChangeText={onCustomNameChange}
+                onFocus={() => onCustomFieldFocus?.(customNameInputRef.current)}
+                placeholder={t('itinerary.create.customNamePlaceholder')}
+                placeholderTextColor={Colors.secondaryText}
+                style={styles.customNameInput}
+              />
+              <View style={styles.customAddressRow}>
+                <MapPin size={14} color={Colors.text} style={{ marginTop: 4 }} />
+                <TextInput
+                  ref={customAddressInputRef}
+                  value={item.customAddress ?? ''}
+                  onChangeText={onCustomAddressChange}
+                  onFocus={() => onCustomFieldFocus?.(customAddressInputRef.current)}
+                  placeholder={t('itinerary.create.customAddressPlaceholder')}
+                  placeholderTextColor={Colors.secondaryText}
+                  style={styles.customAddressInput}
+                  multiline
+                />
+              </View>
             </View>
-          </View>
+          ) : (
+            <>
+              {location && <CachedImage imageKey={location.imagePath} style={styles.routeImage} />}
+
+              <View style={styles.routeInfo}>
+                <Text style={styles.routeName} numberOfLines={1}>
+                  {location?.name}
+                </Text>
+                <View style={styles.routeAddressRow}>
+                  <MapPin size={14} color={Colors.text} style={{ marginTop: 4 }} />
+                  <Text style={styles.routeSubText} numberOfLines={2}>
+                    {location?.address}
+                  </Text>
+                </View>
+              </View>
+            </>
+          )}
 
           <TouchableOpacity style={styles.removeButton} onPress={onRemove}>
             <X size={20} color={Colors.secondaryText} />
@@ -143,6 +184,28 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: Layout.margin.sm,
     gap: Layout.grid.gap.xs,
+  },
+  customCard: {
+    flex: 1,
+    justifyContent: 'center',
+    gap: Layout.grid.gap.xs,
+  },
+  customNameInput: {
+    ...Typography.caption,
+    color: Colors.text,
+    paddingVertical: 0,
+  },
+  customAddressRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Layout.margin.text,
+  },
+  customAddressInput: {
+    ...Typography.body3,
+    color: Colors.text,
+    flex: 1,
+    paddingVertical: 0,
+    textAlignVertical: 'top',
   },
   routeName: {
     ...Typography.caption,

@@ -29,7 +29,9 @@ export const ItineraryService = {
         coverImagePath: itinerary.cover_image_url || '',
         createdAt: itinerary.created_at,
         updatedAt: itinerary.updated_at,
-        totalLocations: (itinerary as any).itinerary_items?.[0]?.count ?? 0,
+        totalLocations:
+          (itinerary as ItineraryDB & { itinerary_items?: [{ count: number }] })
+            .itinerary_items?.[0]?.count ?? 0,
       };
     });
   },
@@ -54,22 +56,27 @@ export const ItineraryService = {
       coverImagePath: itinerary.cover_image_url || '',
       // itinerary items
       itineraryItems: itinerary.itinerary_items.map((item) => {
-        const location = (item as any).locations;
+        const location = item.locations;
+        const mappedLocation = location
+          ? {
+              id: location.id,
+              cityId: location.city_id,
+              name: location.name,
+              description: location.description,
+              imagePath: location.image_url,
+              address: location.address,
+            }
+          : null;
         return {
           id: item.id,
           itineraryId: item.itinerary_id,
           day: item.day,
           locationId: item.location_id,
           timestamp: item.timestamp,
-          // itinerary location detail
-          location: {
-            id: location.id,
-            cityId: location.city_id,
-            name: location.name,
-            description: location.description,
-            imagePath: location.image_url,
-            address: location.address,
-          },
+          itemType: item.item_type ?? (item.location_id ? 'location' : 'custom'),
+          customName: item.custom_name,
+          customAddress: item.custom_address,
+          location: mappedLocation,
         };
       }),
     };
@@ -83,9 +90,12 @@ export const ItineraryService = {
   async createItineraryItem(itineraryItem: Omit<ItineraryItem, 'id'>): Promise<void> {
     const newItineraryItem: Omit<ItineraryItemDB, 'id'> = {
       itinerary_id: itineraryItem.itineraryId,
-      location_id: itineraryItem.locationId,
+      location_id: itineraryItem.locationId ?? null,
       day: itineraryItem.day,
       timestamp: itineraryItem.timestamp || new Date().toISOString(),
+      item_type: itineraryItem.itemType,
+      custom_name: itineraryItem.customName ?? null,
+      custom_address: itineraryItem.customAddress ?? null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
@@ -100,9 +110,12 @@ export const ItineraryService = {
   async updateItineraryItem(itineraryItem: ItineraryItem): Promise<void> {
     const dataToUpdate: Partial<ItineraryItemDB> = {
       itinerary_id: itineraryItem.itineraryId,
-      location_id: itineraryItem.locationId,
+      location_id: itineraryItem.locationId ?? null,
       day: itineraryItem.day,
       timestamp: itineraryItem.timestamp,
+      item_type: itineraryItem.itemType,
+      custom_name: itineraryItem.customName ?? null,
+      custom_address: itineraryItem.customAddress ?? null,
       updated_at: new Date().toISOString(),
     };
     await itineraryApi.updateItineraryItem(itineraryItem.id, dataToUpdate);

@@ -147,7 +147,7 @@ export const StickyNote: React.FC<StickyNoteProps> = ({
         </View>
 
         <Text style={variant === 'grid' ? styles.stickyAuthor : styles.stickyAuthorLarge}>
-          - {isMe ? 'ME' : sticky.displayName || 'TRAVELER'}
+          - {isMe ? t('stickyNotes.me') : sticky.displayName || t('stickyNotes.traveler')}
         </Text>
       </View>
       {variant === 'detail' && onClose && (

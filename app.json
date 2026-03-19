@@ -2,7 +2,7 @@
   "expo": {
     "name": "ECHO 余甜",
     "slug": "itinerary-check-in",
-    "version": "1.0.2",
+    "version": "1.3.0",
     "orientation": "portrait",
     "icon": "./assets/images/appIcon.png",
     "scheme": "io.echoyutian",

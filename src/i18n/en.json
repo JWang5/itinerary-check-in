@@ -78,6 +78,7 @@
     "hour": "Hour",
     "minute": "Minute",
     "period": "AM/PM",
+    "day": "day",
     "days": "days"
   },
   "profile": {
@@ -146,7 +147,9 @@
     "emptyWall": "No sticky notes yet. Explore cities and locations and leave one!",
     "comingSoon": "Coming Soon",
     "comingSoonContent": "This feature will be available in a future update!",
-    "limitReached": "You can only have up to 2 sticky notes per location :("
+    "limitReached": "You can only have up to 2 sticky notes per location :(",
+    "me": "Me",
+    "traveler": "Traveler"
   },
   "itinerary": {
     "title": "My Plans",
@@ -160,7 +163,7 @@
       "ongoing": "Ongoing"
     },
     "locationsPlaned": "Planned Locations",
-    "emptyRoute": "No locations added for this day",
+    "emptyRoute": "No stops added for this day",
     "noRoutePlanned": "No route planned",
     "emptyPastRoute": "No past routes",
     "day": "Day {{day}}",
@@ -174,6 +177,10 @@
       "dateRangePlaceholder": "Select dates",
       "locationsPlaned": "Planned Locations",
       "addLocation": "Add Location",
+      "addCustomStop": "Add Custom Stop",
+      "customStopBadge": "Custom Stop",
+      "customNamePlaceholder": "Enter stop name",
+      "customAddressPlaceholder": "Enter address",
       "locations": "locations",
       "selectLocations": "Select Locations",
       "searchLocations": "Search locations...",
@@ -183,6 +190,9 @@
       "updateButton": "Update Plan",
       "errorNoTitle": "Please enter a trip name",
       "errorNoDate": "Please select a date range",
+      "errorInvalidDateRange": "End date cannot be before start date",
+      "errorNoItems": "Please add at least one stop",
+      "errorIncompleteCustomStop": "Please complete the custom stop name and address",
       "errorNoLocations": "Please add at least one location",
       "errorSaving": "Failed to save itinerary",
       "resetConfirm": "Are you sure you want to reset all fields?",

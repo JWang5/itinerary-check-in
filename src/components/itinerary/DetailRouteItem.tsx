@@ -1,7 +1,7 @@
 import { Layout } from '@/src/constants/theme/layout';
 import { Colors, Shadows } from '@/src/constants/theme/theme';
 import { Typography } from '@/src/constants/theme/typography';
-import { Location } from '@/src/types/model';
+import { ItineraryItem } from '@/src/types/model';
 import { useRouter } from 'expo-router';
 import { MapPin } from 'lucide-react-native';
 import React from 'react';
@@ -10,39 +10,61 @@ import { CachedImage } from '../CachedImage';
 import { TimelineItem } from './TimelineItem';
 
 interface DetailRouteItemProps {
-  location: Location;
+  item: ItineraryItem;
   time: string;
   isFirst: boolean;
   isLast: boolean;
+  isActive?: boolean;
 }
 
-export const DetailRouteItem = ({ location, time, isFirst, isLast }: DetailRouteItemProps) => {
+export const DetailRouteItem = ({ item, time, isFirst, isLast, isActive = false }: DetailRouteItemProps) => {
   const router = useRouter();
+  const isCustomItem = item.itemType === 'custom';
+  const location = item.location;
+
   return (
-    <TimelineItem isFirst={isFirst} isLast={isLast} isActive={isFirst}>
+    <TimelineItem isFirst={isFirst} isLast={isLast} isActive={isActive}>
       <View style={styles.routeItemContainer}>
         <Text style={styles.itemTime}>{time}</Text>
-        <TouchableOpacity
-          style={styles.routeItem}
-          onPress={() => {
-            router.push(`/location/${location.id}`);
-          }}>
-          <CachedImage imageKey={location.imagePath} style={styles.routeImage} />
-          <View style={styles.routeInfo}>
-            <Text style={styles.routeName} numberOfLines={1}>
-              {location.name}
-            </Text>
-            <View style={styles.routeAddressRow}>
-              <MapPin size={14} color={Colors.text} style={{ marginTop: 4 }} />
-              <Text style={styles.routeAddress} numberOfLines={2}>
-                {location.address}
+        {isCustomItem ? (
+          <View style={styles.routeItem}>
+            <View style={styles.routeInfo}>
+              <Text style={styles.routeName} numberOfLines={1}>
+                {item.customName ?? ''}
+              </Text>
+              <View style={styles.routeAddressRow}>
+                <MapPin size={14} color={Colors.text} style={{ marginTop: 4 }} />
+                <Text style={styles.routeAddress} numberOfLines={2}>
+                  {item.customAddress ?? ''}
+                </Text>
+              </View>
+            </View>
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={styles.routeItem}
+            onPress={() => {
+              if (location?.id) {
+                router.push(`/location/${location.id}`);
+              }
+            }}>
+            <CachedImage imageKey={location?.imagePath} style={styles.routeImage} />
+            <View style={styles.routeInfo}>
+              <Text style={styles.routeName} numberOfLines={1}>
+                {location?.name}
+              </Text>
+              <View style={styles.routeAddressRow}>
+                <MapPin size={14} color={Colors.text} style={{ marginTop: 4 }} />
+                <Text style={styles.routeAddress} numberOfLines={2}>
+                  {location?.address}
+                </Text>
+              </View>
+              <Text style={styles.routeDescription} numberOfLines={2}>
+                {location?.description}
               </Text>
             </View>
-            <Text style={styles.routeDescription} numberOfLines={2}>
-              {location.description}
-            </Text>
-          </View>
-        </TouchableOpacity>
+          </TouchableOpacity>
+        )}
       </View>
     </TimelineItem>
   );

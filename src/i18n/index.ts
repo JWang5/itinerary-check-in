@@ -1,5 +1,4 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Localization from 'expo-localization';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { i18nConfig } from './config';
@@ -15,7 +14,7 @@ const languageDetector = {
       if (storedLanguage) {
         return callback(storedLanguage);
       }
-      return callback(Localization.getLocales()[0]?.languageCode || 'zh');
+      return callback('zh');
     } catch (error) {
       console.log('Error reading language', error);
       return callback('zh');

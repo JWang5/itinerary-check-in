@@ -8,7 +8,9 @@ import { Layout } from '@/src/constants/theme/layout';
 import { Colors } from '@/src/constants/theme/theme';
 import { Typography } from '@/src/constants/theme/typography';
 import { ItineraryService } from '@/src/services/itineraryService';
+import { Itinerary } from '@/src/types/model';
 import {
+  calculateItineraryStatus,
   formatToShortDate,
   formatToTime,
   getDaysCount,
@@ -29,7 +31,7 @@ export default function ItineraryDetailScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
 
-  const [itinerary, setItinerary] = useState<any>(null);
+  const [itinerary, setItinerary] = useState<Itinerary | null>(null);
   const [activeDay, setActiveDay] = useState(0);
 
   const [isInitialized, setIsInitialized] = useState(false);
@@ -95,10 +97,14 @@ export default function ItineraryDetailScreen() {
       if (found) {
         setItinerary(found);
       }
+    } catch (error) {
+      console.error(error);
+      setAlertConfig({ title: t('common.error'), message: t('common.fetchError') });
+      setAlertVisible(true);
     } finally {
       setIsInitialized(true);
     }
-  }, [id]);
+  }, [id, t]);
 
   useFocusEffect(
     useCallback(() => {
@@ -174,12 +180,36 @@ export default function ItineraryDetailScreen() {
   const daysCount = getDaysCount(startDate, endDate);
 
   const dayData = (itinerary.itineraryItems || [])
-    .filter((item: any) => item.day === activeDay)
+    .filter((item) => item.day === activeDay)
     .sort(
-      (a: any, b: any) =>
+      (a, b) =>
         parseTimeToMinutes(formatToTime(a.timestamp)) -
         parseTimeToMinutes(formatToTime(b.timestamp)),
     );
+
+  const activeItemId = (() => {
+    if (calculateItineraryStatus(itinerary.startDate, itinerary.endDate) !== 'ongoing') return null;
+
+    const today = new Date();
+    const startDay = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+    const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const currentDayIndex = Math.round(
+      (todayDay.getTime() - startDay.getTime()) / (1000 * 60 * 60 * 24),
+    );
+
+    if (activeDay !== currentDayIndex) return null;
+
+    const nowMinutes = today.getHours() * 60 + today.getMinutes();
+    let activeId: string | null = null;
+    for (const item of dayData) {
+      if (parseTimeToMinutes(formatToTime(item.timestamp)) <= nowMinutes) {
+        activeId = item.id;
+      } else {
+        break;
+      }
+    }
+    return activeId;
+  })();
 
   return (
     <View style={styles.container}>
@@ -225,8 +255,9 @@ export default function ItineraryDetailScreen() {
               <Calendar style={{ marginTop: 3 }} size={16} color={Colors.secondaryText} />
               <Text style={styles.headerDate}>
                 {formatToShortDate(itinerary.startDate)}
-                {'—'}
-                {formatToShortDate(itinerary.endDate)}
+                {itinerary.endDate === itinerary.startDate
+                  ? ''
+                  : `—${formatToShortDate(itinerary.endDate)}`}
               </Text>
             </View>
 
@@ -253,13 +284,14 @@ export default function ItineraryDetailScreen() {
           </View>
 
           <View>
-            {dayData.map((item: any, index: number) => (
+            {dayData.map((item, index) => (
               <DetailRouteItem
                 key={item.id}
-                location={item.location}
+                item={item}
                 time={formatToTime(item.timestamp)}
                 isFirst={index === 0}
                 isLast={index === dayData.length - 1}
+                isActive={item.id === activeItemId}
               />
             ))}
             {dayData.length === 0 && (

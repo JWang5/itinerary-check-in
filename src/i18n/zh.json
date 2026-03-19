@@ -78,6 +78,7 @@
     "hour": "时",
     "minute": "分",
     "period": "上/下午",
+    "day": "天",
     "days": "天"
   },
   "profile": {
@@ -146,7 +147,9 @@
     "searchPlaceholder": "搜索城市或地点...",
     "comingSoon": "敬请期待",
     "comingSoonContent": "此功能将在未来版本中推出！",
-    "limitReached": "每个地点最多只能留下 2 条笔记 :("
+    "limitReached": "每个地点最多只能留下 2 条笔记 :(",
+    "me": "我",
+    "traveler": "其他甜玉米"
   },
   "itinerary": {
     "title": "出发~",
@@ -160,7 +163,7 @@
       "ongoing": "进行中"
     },
     "locationsPlaned": "个地点",
-    "emptyRoute": "这一天还没有行程计划哦",
+    "emptyRoute": "这一天还没有添加行程站点哦",
     "noRoutePlanned": "还没有行程计划，快来计划新的旅程吧",
     "emptyPastRoute": "还没有结束的行程哦",
     "day": "第{{day}}天",
@@ -174,6 +177,10 @@
       "dateRangePlaceholder": "选择日期",
       "locationsPlaned": "计划地点",
       "addLocation": "添加地点",
+      "addCustomStop": "添加自定义站点",
+      "customStopBadge": "自定义站点",
+      "customNamePlaceholder": "请输入站点名称",
+      "customAddressPlaceholder": "请输入地址",
       "locations": "个地点",
       "selectLocations": "选择地点",
       "searchLocations": "搜索地点...",
@@ -183,6 +190,9 @@
       "updateButton": "更新行程",
       "errorNoTitle": "请输入行程名称",
       "errorNoDate": "请选择日期范围",
+      "errorInvalidDateRange": "结束日期不能早于开始日期",
+      "errorNoItems": "请至少添加一个行程站点",
+      "errorIncompleteCustomStop": "请完整填写自定义站点的名称和地址",
       "errorNoLocations": "请添加至少一个地点",
       "errorSaving": "保存行程失败",
       "resetConfirm": "确定要重置所有内容吗？",

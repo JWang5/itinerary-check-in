@@ -26,11 +26,15 @@ export const CalendarPickerModal = ({
   const [localEnd, setLocalEnd] = useState<Date | null>(endDate);
   const { t, i18n } = useTranslation();
 
+  const getDayValue = (date: Date) =>
+    new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+
   // Sync local state with props when the modal opens
   useEffect(() => {
     if (visible) {
       setLocalStart(startDate);
       setLocalEnd(endDate);
+      setCurrentMonth(startDate ?? new Date());
     }
   }, [visible, startDate, endDate]);
 
@@ -53,24 +57,37 @@ export const CalendarPickerModal = ({
   }
 
   const handleDatePress = (date: Date) => {
+    const pressedDay = getDayValue(date);
+    const startDay = localStart ? getDayValue(localStart) : null;
+
     if (!localStart || (localStart && localEnd)) {
       setLocalStart(date);
       setLocalEnd(null);
-    } else if (date < localStart) {
+    } else if (startDay !== null && pressedDay < startDay) {
       setLocalStart(date);
-    } else if (date > localStart) {
+      setLocalEnd(null);
+    } else if (startDay !== null && pressedDay > startDay) {
       setLocalEnd(date);
     }
   };
 
   const isSelected = (date: Date) => {
-    if (localStart && date.getTime() === localStart.getTime()) return true;
-    if (localEnd && date.getTime() === localEnd.getTime()) return true;
+    const dayValue = getDayValue(date);
+
+    if (localStart && dayValue === getDayValue(localStart)) return true;
+    if (localEnd && dayValue === getDayValue(localEnd)) return true;
     return false;
   };
 
   const isInRange = (date: Date) => {
-    if (localStart && localEnd && date > localStart && date < localEnd) return true;
+    const dayValue = getDayValue(date);
+
+    if (localStart && localEnd) {
+      const startDay = getDayValue(localStart);
+      const endDay = getDayValue(localEnd);
+      return dayValue > startDay && dayValue < endDay;
+    }
+
     return false;
   };
 
@@ -151,9 +168,9 @@ export const CalendarPickerModal = ({
               <Text style={styles.calendarCancelText}>{t('common.cancel')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.calendarApplyButton, (!localStart || !localEnd) && { opacity: 0.6 }]}
-              disabled={!localStart || !localEnd}
-              onPress={() => localStart && localEnd && onSelect(localStart, localEnd)}>
+              style={[styles.calendarApplyButton, !localStart && { opacity: 0.6 }]}
+              disabled={!localStart}
+              onPress={() => localStart && onSelect(localStart, localEnd ?? localStart)}>
               <Text style={styles.calendarApplyText}>{t('common.apply')}</Text>
             </TouchableOpacity>
           </View>

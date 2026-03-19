@@ -58,15 +58,20 @@ export interface Itinerary {
   status?: 'ongoing' | 'upcoming' | 'past';
 }
 
+export type ItineraryItemType = 'location' | 'custom';
+
 export interface ItineraryItem {
   id: string;
   itineraryId: string;
-  locationId: string;
+  locationId?: string | null;
   day: number;
   timestamp: string; // ISO date string
+  itemType: ItineraryItemType;
+  customName?: string | null;
+  customAddress?: string | null;
   createdAt?: string;
   updatedAt?: string;
-  location?: Location;
+  location?: Location | null;
 }
 
 export interface CheckIn {
@@ -78,6 +83,9 @@ export interface CheckIn {
 
 export interface PlannedItem {
   id: string;
-  location: Location;
   time: string;
+  itemType: ItineraryItemType;
+  location?: Location | null;
+  customName?: string;
+  customAddress?: string;
 }

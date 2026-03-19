@@ -56,9 +56,12 @@ export interface ItineraryItemDB {
   id: string;
   created_at?: string;
   itinerary_id: string;
-  location_id: string;
+  location_id?: string | null;
   day: number;
   timestamp: string;
+  item_type?: 'location' | 'custom';
+  custom_name?: string | null;
+  custom_address?: string | null;
   updated_at?: string;
 }
 

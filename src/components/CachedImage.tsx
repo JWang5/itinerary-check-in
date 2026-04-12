@@ -32,7 +32,9 @@ export function CachedImage({
       contentFit="cover"
       transition={200}
       onError={() => {
-        if (!source || hasRetried) {
+        // Skip retry for direct public URLs — there is no signed URL to refresh
+        const isDirect = imageKey?.startsWith('https://') || imageKey?.startsWith('http://');
+        if (!source || hasRetried || isDirect) {
           return;
         }
 

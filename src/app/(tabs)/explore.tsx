@@ -119,11 +119,13 @@ export default function ExploreScreen() {
         })
       }>
       <CachedImage imageKey={item.imagePath} style={styles.cardImage} />
-      <View style={styles.cardOverlay}>
-        <View style={styles.cardInfo}>
-          <Text style={styles.cardTitle}>{item.name}</Text>
-        </View>
-      </View>
+      <LinearGradient
+        colors={['rgba(0,0,0,0.75)', 'transparent']}
+        start={{ x: 0, y: 1 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.cardGradient}>
+        <Text style={styles.cardTitle}>{item.name}</Text>
+      </LinearGradient>
     </TouchableOpacity>
   );
 
@@ -324,24 +326,15 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  cardOverlay: {
-    position: 'absolute',
-    bottom: Layout.padding.lg,
-    left: Layout.padding.lg,
-    right: Layout.padding.lg,
-    padding: Layout.padding.sm,
-    backgroundColor: 'transparent',
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  cardInfo: {
-    flex: 1,
+  cardGradient: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'flex-end',
+    alignItems: 'flex-start',
+    padding: Layout.padding.lg,
   },
   cardTitle: {
     ...Typography.h2,
-    color: Colors.text,
-    marginBottom: Layout.margin.text,
+    color: '#fff',
   },
   sectionHeader: {
     flexDirection: 'row',

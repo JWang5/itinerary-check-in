@@ -1,7 +1,6 @@
 import { Session, User } from '@supabase/supabase-js';
-import React, { createContext, PropsWithChildren, useEffect, useState } from 'react';
-import { setupAuthLinking } from '../utils/authLinking';
-import { supabase } from '../utils/supabase';
+import React, { createContext, PropsWithChildren } from 'react';
+import { DEMO_USER_ID, MOCK_PROFILE } from '../mock/mockData';
 
 type AuthProps = {
   user: User | null;
@@ -15,7 +14,6 @@ type AuthProps = {
 
 export const AuthContext = createContext<AuthProps | null>(null);
 
-// Custom hook to read the context values
 export function useAuth() {
   const context = React.useContext(AuthContext);
   if (!context) {
@@ -24,74 +22,37 @@ export function useAuth() {
   return context;
 }
 
+// ─── Demo mock user & session ────────────────────────────────────────────────
+
+const DEMO_USER = {
+  id: DEMO_USER_ID,
+  email: 'demo@echoyutian.com',
+  app_metadata: {},
+  user_metadata: { display_name: MOCK_PROFILE.display_name },
+  aud: 'authenticated',
+  created_at: '2025-01-01T00:00:00Z',
+} as unknown as User;
+
+const DEMO_SESSION = {
+  access_token: 'demo-access-token',
+  refresh_token: 'demo-refresh-token',
+  expires_in: 9999999,
+  token_type: 'bearer',
+  user: DEMO_USER,
+} as unknown as Session;
+
+// ─── Provider ────────────────────────────────────────────────────────────────
+
 export const AuthProvider = ({ children }: PropsWithChildren) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [initialized, setInitialized] = useState<boolean>(false);
-
-  useEffect(() => {
-    // Listen for changes to authentication state
-    const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('[AuthProvider] Event:', event, 'Session established:', !!session);
-
-      setSession(session);
-      setUser(session ? session.user : null);
-      setInitialized(true);
-    });
-
-    // Setup deep linking handler
-    // This allows password reset and email confirmation links to work
-    // when clicked from email apps
-    // It's safe to clear this subscription on unmount
-    const cleanupLinking = setupAuthLinking();
-
-    return () => {
-      data.subscription.unsubscribe();
-      cleanupLinking();
-    };
-  }, []);
-
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) throw error;
-  };
-
-  const signUp = async (email: string, password: string, options?: any) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options,
-    });
-    if (error) throw error;
-    return data;
-  };
-
-  const resetPassword = async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'io.echoyutian://auth/reset-password',
-    });
-    if (error) throw error;
-  };
-
-  // Log out the user
-  const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
-  };
-
-  const value = {
-    user,
-    session,
-    initialized,
-    signOut,
-    signIn,
-    signUp,
-    resetPassword,
+  // Demo branch: always authenticated, no Supabase calls needed.
+  const value: AuthProps = {
+    user: DEMO_USER,
+    session: DEMO_SESSION,
+    initialized: true,
+    signIn: async () => {},
+    signUp: async () => ({}),
+    signOut: async () => {},
+    resetPassword: async () => {},
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

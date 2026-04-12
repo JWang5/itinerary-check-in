@@ -38,6 +38,13 @@ export default function StartPage() {
     sessionRef.current = session;
   }, [session]);
 
+  // Demo mode: skip landing page and go directly to the app
+  useEffect(() => {
+    if (session) {
+      router.replace(EXPLORE_PAGE);
+    }
+  }, [session, router]);
+
   const loginOpacity = useRef(new Animated.Value(0)).current;
   const loginScale = useRef(new Animated.Value(0.95)).current;
 

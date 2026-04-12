@@ -167,6 +167,15 @@ export const useSecureImage = (imagePath: string | null | undefined) => {
         return;
       }
 
+      // Demo mode: imagePath is already a full public URL — return it directly
+      if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+        if (!cancelled) {
+          setData(imagePath);
+          setIsLoading(false);
+        }
+        return;
+      }
+
       if (!session?.access_token) {
         console.log('[storageCache] Skipping image load: missing session token', {
           imagePath,

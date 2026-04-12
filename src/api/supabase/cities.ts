@@ -1,40 +1,21 @@
-import { supabase } from '@/src/utils/supabase';
+import { MOCK_CATEGORIES_WITH_CITIES, MOCK_CITIES } from '@/src/mock/mockData';
 
 const TABLE_NAME = 'cities';
 
 /**
  * Raw database queries for city table
+ * Demo branch: returns mock data instead of Supabase queries.
  */
 export const citiesApi = {
-  /**
-   * Fetch all cities from database
-   */
   async getAll(): Promise<{ id: string; name: string }[]> {
-    const { data, error } = await supabase.from(TABLE_NAME).select('id, name');
-
-    if (error) throw error;
-    return data || [];
+    return MOCK_CITIES.map((c) => ({ id: c.id, name: c.name }));
   },
 
-  /**
-   * Fetch city name by ID
-   */
   async getNameById(id: string): Promise<string | null> {
-    const { data, error } = await supabase.from(TABLE_NAME).select('name').eq('id', id).single();
-
-    if (error) throw error;
-    return data?.name || null;
+    return MOCK_CITIES.find((c) => c.id === id)?.name ?? null;
   },
 
-  /**
-   * Get categories with their cities using RPC function
-   */
   async getCategoriesWithCities(): Promise<any> {
-    const { data, error } = await supabase.rpc('get_categories_with_cities');
-    if (error) {
-      console.error('RPC error', error);
-      throw error;
-    }
-    return data;
+    return MOCK_CATEGORIES_WITH_CITIES;
   },
 };

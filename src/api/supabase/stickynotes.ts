@@ -1,36 +1,25 @@
-import { supabase } from '@/src/utils/supabase';
 import { StickyDB } from '../types/db';
+import { DEMO_USER_ID, MOCK_STICKIES } from '@/src/mock/mockData';
 
 const TABLE_NAME = 'stickies';
 
+// In-memory state so create/update/delete actions work during a demo session
+let demoStickies: any[] = [...MOCK_STICKIES];
+
 /**
  * Raw database queries for sticky notes table
+ * Demo branch: returns mock data instead of Supabase queries.
  */
 export const stickyNotesApi = {
-  /**
-   * Fetch paginated sticky notes from database
-   */
   async getPaginated(from: number, to: number): Promise<any[]> {
-    const { data, error } = await supabase
-      .from(TABLE_NAME)
-      .select('*, locations(name, city_id, cities(name)), profiles(display_name)')
-      .order('created_at', {
-        ascending: false,
-      })
-      .range(from, to);
-
-    if (error) throw error;
-    return data || [];
+    const sorted = [...demoStickies].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
+    return sorted.slice(from, to + 1);
   },
 
-  /**
-   * Fetch sticky note by ID
-   */
   async getById(id: string): Promise<StickyDB | null> {
-    const { data, error } = await supabase.from(TABLE_NAME).select('*').eq('id', id).single();
-
-    if (error) throw error;
-    return data;
+    return (demoStickies.find((s) => s.id === id) as unknown as StickyDB) ?? null;
   },
 
   async getPaginatedByLocationId(
@@ -38,65 +27,54 @@ export const stickyNotesApi = {
     from: number,
     to: number,
   ): Promise<StickyDB[] & { profiles?: { display_name: string } }> {
-    const { data, error } = await supabase
-      .from(TABLE_NAME)
-      .select('*, locations(name, city_id, cities(name)), profiles(display_name)')
-      .eq('location_id', locationId)
-      .order('created_at', {
-        ascending: false,
-      })
-      .range(from, to);
-
-    if (error) throw error;
-    return data || [];
+    const filtered = demoStickies
+      .filter((s) => s.location_id === locationId)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    return filtered.slice(from, to + 1) as unknown as StickyDB[];
   },
 
   async getStickyCountByLocationId(locationId: string): Promise<number> {
-    const { count, error } = await supabase
-      .from(TABLE_NAME)
-      .select('*', { count: 'exact', head: true })
-      .eq('location_id', locationId);
-
-    if (error) throw error;
-    return count || 0;
+    return demoStickies.filter((s) => s.location_id === locationId).length;
   },
 
   async getByUserId(userId: string): Promise<any[]> {
-    const { data, error } = await supabase
-      .from(TABLE_NAME)
-      .select('*, locations(name, city_id, cities(name)), profiles(display_name)')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-    return data || [];
+    return demoStickies
+      .filter((s) => s.user_id === userId)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   },
 
   async create(sticky: Omit<StickyDB, 'id' | 'created_at' | 'updated_at'>): Promise<StickyDB> {
-    const { data, error } = await supabase.from(TABLE_NAME).insert([sticky]).select().single();
-    if (error) throw error;
-    return data;
+    const now = new Date().toISOString();
+    const newSticky: any = {
+      id: `sticky-demo-${Date.now()}`,
+      ...sticky,
+      created_at: now,
+      updated_at: now,
+      locations: null,
+      profiles: { display_name: 'Alex Chen' },
+    };
+    demoStickies.unshift(newSticky);
+    return newSticky as StickyDB;
   },
 
   async update(id: string, sticky: Partial<StickyDB>): Promise<StickyDB> {
-    const { data, error } = await supabase.from(TABLE_NAME).update(sticky).eq('id', id).single();
-    if (error) throw error;
-    return data;
+    const index = demoStickies.findIndex((s) => s.id === id);
+    if (index !== -1) {
+      demoStickies[index] = {
+        ...demoStickies[index],
+        ...sticky,
+        updated_at: new Date().toISOString(),
+      };
+      return demoStickies[index] as any;
+    }
+    throw new Error(`Sticky ${id} not found`);
   },
 
   async delete(id: string): Promise<void> {
-    const { error } = await supabase.from(TABLE_NAME).delete().eq('id', id);
-
-    if (error) throw error;
+    demoStickies = demoStickies.filter((s) => s.id !== id);
   },
 
   async getCountByUserAndLocation(userId: string, locationId: string): Promise<number> {
-    const { count, error } = await supabase
-      .from(TABLE_NAME)
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .eq('location_id', locationId);
-    if (error) throw error;
-    return count || 0;
+    return demoStickies.filter((s) => s.user_id === userId && s.location_id === locationId).length;
   },
 };

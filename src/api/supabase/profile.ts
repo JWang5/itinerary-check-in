@@ -1,20 +1,28 @@
-import { supabase } from '@/src/utils/supabase';
 import { UserDB } from '../types/db';
+import { MOCK_PROFILE } from '@/src/mock/mockData';
 
+// In-memory profile so updates persist during a session
+let demoProfile = { ...MOCK_PROFILE };
+
+/**
+ * Profile API
+ * Demo branch: returns mock profile data instead of Supabase queries.
+ */
 export const profileApi = {
   async getProfileById(userId: string): Promise<UserDB> {
-    const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
-    if (error) throw error;
-    return data;
+    return {
+      id: demoProfile.id,
+      display_name: demoProfile.display_name,
+      avatar_url: demoProfile.avatar_url,
+    };
   },
+
   async updateProfile(userId: string, profile: Partial<UserDB>): Promise<UserDB> {
-    const { data, error } = await supabase
-      .from('profiles')
-      .update({ ...profile, updated_at: new Date().toISOString() })
-      .eq('id', userId)
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
+    demoProfile = { ...demoProfile, ...profile } as typeof demoProfile;
+    return {
+      id: demoProfile.id,
+      display_name: demoProfile.display_name,
+      avatar_url: demoProfile.avatar_url,
+    };
   },
 };

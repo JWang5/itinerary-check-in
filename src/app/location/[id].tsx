@@ -5,7 +5,6 @@ import { ConfettiAnimation } from '@/src/components/ConfettiAnimation';
 import { IconButton } from '@/src/components/iconButton';
 import { AddMessageModal } from '@/src/components/location/addMessageModal';
 import NotFound from '@/src/components/notFound';
-import { ShakeAnimation } from '@/src/components/ShakeAnimation';
 import Skeleton from '@/src/components/skeleton';
 import { StickyNote } from '@/src/components/StickyNote';
 import { BOTTOM_OFFSET, BUTTON_SIZE, Layout } from '@/src/constants/theme/layout';
@@ -194,7 +193,6 @@ export default function LocationScreen() {
   const [isMessageModalVisible, setIsMessageModalVisible] = useState(false);
   const [selectedSticky, setSelectedSticky] = useState<Sticky | null>(null);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
-  const [showShakeAnimation, setShowShakeAnimation] = useState(false);
 
   const [checkInCounts, setCheckInCounts] = useState<number>(0);
   const [stickyCount, setStickyCount] = useState<number>(0);
@@ -257,7 +255,6 @@ export default function LocationScreen() {
     try {
       await addUserCheckInInLocation(session.user.id, location.id);
       setCheckInCounts((prev) => prev + 1);
-      setShowShakeAnimation(true);
       // showAlert(t('common.nice'), t('location.checkedInAt', { locationName: location.name }));
     } catch (error) {
       console.error('Failed to check in', error);
@@ -535,10 +532,6 @@ export default function LocationScreen() {
       <ConfettiAnimation
         visible={showSuccessAnimation}
         onAnimationComplete={() => setShowSuccessAnimation(false)}
-      />
-      <ShakeAnimation
-        visible={showShakeAnimation}
-        onAnimationComplete={() => setShowShakeAnimation(false)}
       />
       <CustomAlert
         visible={alertVisible}

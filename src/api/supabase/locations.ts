@@ -1,80 +1,51 @@
+import { MOCK_LOCATIONS, MOCK_TOP_DESTINATIONS } from '@/src/mock/mockData';
 import { LocationDB } from '@/src/api/types/db';
-import { supabase } from '@/src/utils/supabase';
 
 const LOCATIONS_TABLE = 'locations';
+
 /**
  * Raw database queries for locations table
+ * Demo branch: returns mock data instead of Supabase queries.
  */
 export const locationsApi = {
-  /**
-   * Fetch all locations from database
-   */
   async getAll(): Promise<LocationDB[]> {
-    const { data, error } = await supabase.from(LOCATIONS_TABLE).select('*');
-
-    if (error) throw error;
-    return data || [];
+    return MOCK_LOCATIONS as unknown as LocationDB[];
   },
 
-  /**
-   * Fetch all location names with id and city id from database
-   */
   async getAllLocationsSubData(): Promise<{ id: string; name: string; city_id: string }[]> {
-    const { data, error } = await supabase.from(LOCATIONS_TABLE).select('id, name, city_id');
-    if (error) throw error;
-    return data || [];
+    return MOCK_LOCATIONS.map((l) => ({ id: l.id, name: l.name, city_id: l.city_id }));
   },
 
-  /**
-   * Fetch location by ID with city name
-   */
   async getWithCityById(id: string): Promise<LocationDB | null> {
-    const { data, error } = await supabase
-      .from(LOCATIONS_TABLE)
-      .select('*, cities(name)')
-      .eq('id', id)
-      .single();
-    if (error) throw error;
-    return data;
+    const loc = MOCK_LOCATIONS.find((l) => l.id === id);
+    if (!loc) return null;
+    return {
+      ...loc,
+      cities: { name: loc.city_name },
+    } as unknown as LocationDB;
   },
 
-  /**
-   * Fetch multiple locations by their IDs
-   */
   async getMultipleByIds(ids: string[]): Promise<LocationDB[]> {
     if (ids.length === 0) return [];
-    const { data, error } = await supabase
-      .from(LOCATIONS_TABLE)
-      .select('*, cities(name)')
-      .in('id', ids);
-
-    if (error) throw error;
-    return data || [];
+    return MOCK_LOCATIONS.filter((l) => ids.includes(l.id)).map((l) => ({
+      ...l,
+      cities: { name: l.city_name },
+    })) as unknown as LocationDB[];
   },
 
   async getLocationsWithMostVisits(
     limit: number = 10,
   ): Promise<(LocationDB & { city_name: string })[]> {
-    const { data, error } = await supabase.rpc('top_locations', {
-      limit_count: limit,
-    });
-    if (error) throw error;
-    return data || [];
+    return MOCK_TOP_DESTINATIONS.slice(0, limit) as unknown as (LocationDB & {
+      city_name: string;
+    })[];
   },
 
   async getByCity(cityId: string): Promise<LocationDB[]> {
-    const { data, error } = await supabase
-      .from(LOCATIONS_TABLE)
-      .select('*')
-      .eq('city_id', cityId)
-      .order('index', { ascending: true });
-    if (error) throw error;
-    return data || [];
+    return MOCK_LOCATIONS.filter((l) => l.city_id === cityId) as unknown as LocationDB[];
   },
 
   async getLocationsByUserId(userId: string): Promise<LocationDB[]> {
-    const { data, error } = await supabase.from(LOCATIONS_TABLE).select('*').eq('user_id', userId);
-    if (error) throw error;
-    return data || [];
+    return [];
   },
 };

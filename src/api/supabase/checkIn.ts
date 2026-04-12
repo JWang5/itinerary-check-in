@@ -1,111 +1,63 @@
 import { CheckInDB } from '@/src/api/types/db';
-import { supabase } from '@/src/utils/supabase';
+import {
+  DEMO_USER_ID,
+  MOCK_CHECKIN_COUNTS,
+  MOCK_USER_CHECKIN_LOCATION_IDS,
+  MOCK_USER_CHECKINS,
+} from '@/src/mock/mockData';
 
 const CHECK_IN_TABLE = 'check_in';
+
+// In-memory state for demo check-ins so toggle actions work during a session
+let demoCheckedInLocationIds = [...MOCK_USER_CHECKIN_LOCATION_IDS];
+
 /**
  * Raw database queries for checkins table
+ * Demo branch: returns mock data instead of Supabase queries.
  */
 export const checkInApi = {
-  /**
-   * Fetch all checkins from database
-   */
   async getAll(): Promise<CheckInDB[]> {
-    const { data, error } = await supabase
-      .from(CHECK_IN_TABLE)
-      .select('*')
-      .order('checked_in_at', { ascending: false });
-
-    if (error) throw error;
-    return data || [];
+    return MOCK_USER_CHECKINS as CheckInDB[];
   },
 
-  /**
-   * Create checkin
-   */
   async create(checkin: Partial<CheckInDB>): Promise<CheckInDB> {
-    const { data, error } = await supabase.from(CHECK_IN_TABLE).insert([checkin]).select().single();
-
-    if (error) throw error;
-    return data;
+    const newCheckin: CheckInDB = {
+      id: `checkin-demo-${Date.now()}`,
+      user_id: checkin.user_id ?? DEMO_USER_ID,
+      location_id: checkin.location_id ?? '',
+      checked_in_at: new Date().toISOString(),
+    };
+    if (newCheckin.location_id && !demoCheckedInLocationIds.includes(newCheckin.location_id)) {
+      demoCheckedInLocationIds.unshift(newCheckin.location_id);
+    }
+    return newCheckin;
   },
 
   async delete(id: string): Promise<void> {
-    const { error } = await supabase.from(CHECK_IN_TABLE).delete().eq('id', id);
-    if (error) throw error;
+    // no-op in demo
   },
 
   async deleteByUserIdAndLocationId(userId: string, locationId: string): Promise<void> {
-    const { error } = await supabase
-      .from(CHECK_IN_TABLE)
-      .delete()
-      .eq('user_id', userId)
-      .eq('location_id', locationId);
-    if (error) throw error;
+    demoCheckedInLocationIds = demoCheckedInLocationIds.filter((id) => id !== locationId);
   },
 
-  /**
-   * Get all check-ins by user ID
-   */
   async getByUserId(userId: string): Promise<CheckInDB[]> {
-    const { data, error } = await supabase
-      .from(CHECK_IN_TABLE)
-      .select('*')
-      .eq('user_id', userId)
-      .order('checked_in_at', { ascending: false });
-
-    if (error) throw error;
-    return data || [];
+    return MOCK_USER_CHECKINS as CheckInDB[];
   },
 
-  /**
-   * Get location IDs for a user's check-ins (efficient - only fetches location_id)
-   */
   async getLocationIdsByUserId(userId: string): Promise<string[]> {
-    const { data, error } = await supabase
-      .from(CHECK_IN_TABLE)
-      .select('location_id')
-      .eq('user_id', userId)
-      .order('checked_in_at', { ascending: false });
-
-    if (error) throw error;
-    return (data || []).map((row) => row.location_id);
+    return [...demoCheckedInLocationIds];
   },
 
-  /**
-   * Get check-in count for a single location (efficient - only fetches count)
-   */
   async getCountByLocationId(locationId: string): Promise<number> {
-    const { count, error } = await supabase
-      .from(CHECK_IN_TABLE)
-      .select('*', { count: 'exact', head: true })
-      .eq('location_id', locationId);
-
-    if (error) throw error;
-    return count || 0;
+    return MOCK_CHECKIN_COUNTS[locationId] ?? 0;
   },
 
-  /**
-   * Get check-in counts for multiple locations in a single query
-   */
   async getCountsByLocationIds(locationIds: string[]): Promise<Record<string, number>> {
-    if (locationIds.length === 0) return {};
-
-    // Fetch all check-ins for the given location IDs and count in JS
-    // This is more efficient than N separate queries
-    const { data, error } = await supabase
-      .from(CHECK_IN_TABLE)
-      .select('location_id')
-      .in('location_id', locationIds);
-
-    if (error) throw error;
-
-    // Count occurrences per location
     const counts: Record<string, number> = {};
-    locationIds.forEach((id) => (counts[id] = 0));
-    (data || []).forEach((row) => {
-      counts[row.location_id] = (counts[row.location_id] || 0) + 1;
+    locationIds.forEach((id) => {
+      counts[id] = MOCK_CHECKIN_COUNTS[id] ?? 0;
     });
-
     return counts;
   },
 };

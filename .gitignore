@@ -52,5 +52,3 @@ app-example
 
 .env
 *.env
-
-*.tgz
